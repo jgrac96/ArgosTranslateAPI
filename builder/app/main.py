@@ -20,7 +20,8 @@ languages = {"English":"EN", "German":"DE", "Italian":"IT", "French":"FR", "Span
 print(glob.glob("app/data/*"))
 # load packages
 req = ["en_fr", "en_de", "en_es", "en_it", "fr_en", "de_en", "es_en", "it_en"]
-for lang_package in req: argostranslate.package.install_from_path("app/data/translate-"+lang_package+"-1_0.argosmodel")
+for lang_package in req:
+    argostranslate.package.install_from_path("app/data/translate-"+lang_package+"-1_0.argosmodel")
 
 api_router = APIRouter()  # setup api router
 
@@ -29,8 +30,10 @@ def translate(source_lang: str, target_lang: str, word: str):
     try:
         source_lang = languages.get(source_lang)
         target_lang = languages.get(target_lang)
-        installed_languages = argostranslate.translate.get_installed_languages() # get installed languages
-        from_lang = list(filter(   # get the correct translation direction through comparing the given source/target
+        # get installed languages
+        installed_languages = argostranslate.translate.get_installed_languages()
+        # get the correct translation direction through comparing the given source/target
+        from_lang = list(filter(
             # language with installed languages
             lambda x: x.code == source_lang.lower(),
             installed_languages))[0]
