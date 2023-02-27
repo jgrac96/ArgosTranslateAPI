@@ -7,6 +7,7 @@
 from fastapi import FastAPI, APIRouter
 import argostranslate.package
 import argostranslate.translate
+import glob
 
 # setup API
 app = FastAPI(
@@ -16,10 +17,10 @@ app = FastAPI(
 
 # to be able to convert from input of API from Java to country codes needed by Argos Translate
 languages = {"English":"EN", "German":"DE", "Italian":"IT", "French":"FR", "Spanish":"ES"}
-
+print(glob.glob("app/data/*"))
 # load packages
 req = ["en_fr", "en_de", "en_es", "en_it", "fr_en", "de_en", "es_en", "it_en"]
-for lang_package in req: argostranslate.package.install_from_path("translate-"+lang_package+"-1_0.argosmodel")
+for lang_package in req: argostranslate.package.install_from_path("app/data/translate-"+lang_package+"-1_0.argosmodel")
 
 api_router = APIRouter()  # setup api router
 
