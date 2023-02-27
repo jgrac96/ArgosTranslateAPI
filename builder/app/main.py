@@ -1,7 +1,7 @@
 """
         from https://www.educative.io/blog/python-fastapi-tutorial
         https://github.com/argosopentech/argos-translate
-    Date: 15/11/2022
+    Date: 20/11/2022
     Translation API based off ArgosTranslate (offline)
 """
 from fastapi import FastAPI, APIRouter
