@@ -19,7 +19,7 @@ languages = {"English":"EN", "German":"DE", "Italian":"IT", "French":"FR", "Span
 
 # load packages
 req = ["en_fr", "en_de", "en_es", "en_it", "fr_en", "de_en", "es_en", "it_en"]
-for lang_package in req: argostranslate.package.install_from_path(lang_package+".argosmodel")
+for lang_package in req: argostranslate.package.install_from_path("translate"+lang_package+".argosmodel")
 
 api_router = APIRouter()  # setup api router
 
