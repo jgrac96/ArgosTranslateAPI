@@ -1,0 +1,88 @@
+<html>
+<head>
+<title>main.py</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.s0 { color: #8c8c8c; font-style: italic;}
+.s1 { color: #080808;}
+.s2 { color: #0033b3;}
+.s3 { color: #067d17;}
+.s4 { color: #1750eb;}
+</style>
+</head>
+<body bgcolor="#ffffff">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#c0c0c0" >
+<tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+main.py</font>
+</center></td></tr></table>
+<pre><span class="s0">&quot;&quot;&quot; 
+    Author: James Grace 
+        from https://www.educative.io/blog/python-fastapi-tutorial 
+        https://github.com/argosopentech/argos-translate 
+    Date: 15/11/2022 
+    Translation API based off ArgosTranslate (offline) 
+&quot;&quot;&quot;</span>
+<span class="s2">from </span><span class="s1">fastapi </span><span class="s2">import </span><span class="s1">FastAPI, APIRouter</span>
+<span class="s2">import </span><span class="s1">argostranslate.package</span>
+<span class="s2">import </span><span class="s1">argostranslate.translate</span>
+<span class="s2">import </span><span class="s1">wget</span>
+
+<span class="s0"># download required packages</span>
+<span class="s1">req = [</span><span class="s3">&quot;en_fr&quot;</span><span class="s1">, </span><span class="s3">&quot;en_de&quot;</span><span class="s1">, </span><span class="s3">&quot;en_es&quot;</span><span class="s1">, </span><span class="s3">&quot;en_it&quot;</span><span class="s1">, </span><span class="s3">&quot;fr_en&quot;</span><span class="s1">, </span><span class="s3">&quot;de_en&quot;</span><span class="s1">, </span><span class="s3">&quot;es_en&quot;</span><span class="s1">, </span><span class="s3">&quot;it_en&quot;</span><span class="s1">]</span>
+<span class="s2">for </span><span class="s1">r_lang_package </span><span class="s2">in </span><span class="s1">req:</span>
+    <span class="s1">wget.download(</span><span class="s3">&quot;https://argosopentech.nyc3.digitaloceanspaces.com/argospm/translate-&quot;</span><span class="s1">+r_lang_package+</span><span class="s3">&quot;-1_0.argosmodel&quot;</span><span class="s1">, r_lang_package+</span><span class="s3">&quot;.argosmodel&quot;</span><span class="s1">)</span>
+
+<span class="s0"># setup API</span>
+<span class="s1">app = FastAPI(</span>
+    <span class="s1">title=</span><span class="s3">&quot;TranslationAPI - Wrapper for ArgosTranslate&quot;</span><span class="s1">,</span>
+    <span class="s1">openapi_url=</span><span class="s3">&quot;/openapi.json&quot;</span>
+<span class="s1">)</span>
+
+<span class="s0"># setup translation API - install argos translate packages for all the languages in the appropriate directions</span>
+
+<span class="s1">languages = [</span><span class="s3">&quot;EN&quot;</span><span class="s1">, </span><span class="s3">&quot;DE&quot;</span><span class="s1">, </span><span class="s3">&quot;IT&quot;</span><span class="s1">, </span><span class="s3">&quot;FR&quot;</span><span class="s1">, </span><span class="s3">&quot;ES&quot;</span><span class="s1">]</span>
+
+<span class="s0"># load packages</span>
+<span class="s2">for </span><span class="s1">lang_package </span><span class="s2">in </span><span class="s1">req:</span>
+    <span class="s1">argostranslate.package.install_from_path(lang_package+</span><span class="s3">&quot;.argosmodel&quot;</span><span class="s1">)</span>
+
+<span class="s1">print(argostranslate.translate.get_installed_languages())</span>
+
+
+<span class="s0"># setup API routing</span>
+<span class="s1">api_router = APIRouter()</span>
+
+
+<span class="s1">@api_router.get(</span><span class="s3">&quot;/&quot;</span><span class="s1">, status_code=</span><span class="s4">200</span><span class="s1">)</span>
+<span class="s2">def </span><span class="s1">root() -&gt; dict:</span>
+    <span class="s2">return </span><span class="s1">{</span><span class="s3">&quot;msg&quot;</span><span class="s1">: </span><span class="s3">&quot;Hello, World&quot;</span><span class="s1">}</span>
+
+
+<span class="s1">@api_router.get(</span><span class="s3">&quot;/translate/&quot;</span><span class="s1">)</span>
+<span class="s2">def </span><span class="s1">translate(sourceLang: str, targetLang: str, word: str):</span>
+    <span class="s2">try</span><span class="s1">:</span>
+        <span class="s0"># get the correct translation direction</span>
+        <span class="s1">installedLanguages = argostranslate.translate.get_installed_languages()</span>
+        <span class="s1">from_lang = list(filter(</span>
+            <span class="s2">lambda </span><span class="s1">x: x.code == sourceLang.lower(),</span>
+            <span class="s1">installedLanguages))[</span><span class="s4">0</span><span class="s1">]</span>
+        <span class="s1">to_lang = list(filter(</span>
+            <span class="s2">lambda </span><span class="s1">x: x.code == targetLang.lower(),</span>
+            <span class="s1">installedLanguages))[</span><span class="s4">0</span><span class="s1">]</span>
+        <span class="s1">translation = from_lang.get_translation(to_lang)</span>
+        <span class="s1">translatedText = translation.translate(word)</span>
+        <span class="s2">return </span><span class="s1">{</span>
+            <span class="s3">&quot;translation&quot;</span><span class="s1">: translatedText,</span>
+            <span class="s3">&quot;success&quot;</span><span class="s1">: </span><span class="s2">True</span>
+        <span class="s1">}</span>
+    <span class="s2">except</span><span class="s1">:</span>
+        <span class="s2">return </span><span class="s1">{</span>
+            <span class="s3">&quot;translation&quot;</span><span class="s1">: </span><span class="s3">&quot;&quot;</span><span class="s1">,</span>
+            <span class="s3">&quot;success&quot;</span><span class="s1">: </span><span class="s2">False</span>
+        <span class="s1">}</span>
+
+<span class="s1">app.include_router(api_router)</span>
+</pre>
+</body>
+</html>
